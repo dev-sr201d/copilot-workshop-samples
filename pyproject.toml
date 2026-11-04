@@ -1,0 +1,23 @@
+[project]
+name = "copilot-workshop-samples"
+version = "0.1.0"
+description = "A small inventory API for the GitHub Copilot workshop"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115,<1",
+    "uvicorn>=0.34,<1",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28,<1",
+    "pytest>=8.3,<10",
+    "ruff>=0.11,<1",
+]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
