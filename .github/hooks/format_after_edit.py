@@ -27,9 +27,17 @@ def edited_paths(event: dict[str, Any]) -> list[str]:
         patch = arguments.get("input", arguments.get("patch"))
         if not isinstance(patch, str):
             raise ValueError("apply_patch must provide an input or patch string.")
-        return re.findall(
-            r"^\*\*\* (?:Add File|Update File|Move to): (.+)$", patch, re.MULTILINE
-        )
+        paths = []
+        for action, path in re.findall(
+            r"^\*\*\* (Add File|Update File|Move to): (.+)$", patch, re.MULTILINE
+        ):
+            if action == "Move to":
+                if not paths:
+                    raise ValueError("Move to must follow an updated file.")
+                paths[-1] = path.rstrip("\r")
+            else:
+                paths.append(path.rstrip("\r"))
+        return paths
     edits = arguments.get("replacements", [arguments])
     if not isinstance(edits, list) or not edits:
         raise ValueError("Expected one edit or a nonempty replacements list.")
@@ -89,7 +97,7 @@ def format_event(event: dict[str, Any], root: Path) -> int:
 
 
 def main() -> int:
-    event = json.load(sys.stdin)
+    event = json.loads(sys.stdin.buffer.read().decode("utf-8-sig"))
     if not isinstance(event, dict):
         raise ValueError("Hook stdin must be a JSON object.")
     return format_event(event, Path(__file__).resolve().parents[2])

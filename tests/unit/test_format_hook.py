@@ -93,3 +93,44 @@ def test_hook_stdin_contract() -> None:
     )
     assert result.returncode == 0, result.stderr
     assert json.loads(result.stdout) == {}
+
+
+def test_hook_formats_moved_patch_destination(tmp_path: Path) -> None:
+    moved = tmp_path / "moved.py"
+    moved.write_text("answer= 42\n", encoding="utf-8")
+    event = {
+        "tool_name": "apply_patch",
+        "tool_input": {
+            "input": "*** Begin Patch\n*** Update File: old.py\n"
+            "*** Move to: moved.py\n*** End Patch"
+        },
+    }
+    assert FORMAT_EVENT(event, tmp_path) == 0
+    assert moved.read_text(encoding="utf-8") == "answer = 42\n"
+
+
+def test_hook_does_not_format_hidden_environments(tmp_path: Path) -> None:
+    environment = tmp_path / ".venv"
+    environment.mkdir()
+    edited = environment / "package.py"
+    edited.write_text("answer= 42\n", encoding="utf-8")
+    assert (
+        FORMAT_EVENT(
+            {"tool_name": "create_file", "tool_input": {"filePath": str(edited)}},
+            tmp_path,
+        )
+        == 0
+    )
+    assert edited.read_text(encoding="utf-8") == "answer= 42\n"
+
+
+def test_hook_rejects_malformed_stdin() -> None:
+    result = subprocess.run(
+        [sys.executable, str(HOOK)],
+        input="not-json",
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode != 0
+    assert "JSONDecodeError" in result.stderr
