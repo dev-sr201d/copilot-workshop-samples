@@ -12,8 +12,12 @@ class ItemStore:
         self._next_id += 1
         return item
 
-    def list(self) -> list[Item]:
-        return list(self._items.values())
+    def list(self, max_quantity: int | None = None) -> list[Item]:
+        return [
+            item
+            for item in self._items.values()
+            if max_quantity is None or item.quantity <= max_quantity
+        ]
 
     def get(self, item_id: int) -> Item | None:
         return self._items.get(item_id)
