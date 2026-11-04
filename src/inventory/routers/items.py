@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi.responses import JSONResponse
 
 from inventory.models import Item, ItemCreate
@@ -22,8 +22,14 @@ def create_item(payload: ItemCreate, store: Store) -> Item:
 
 
 @router.get("", response_model=list[Item])
-def list_items(store: Store) -> list[Item]:
-    return store.list()
+def list_items(
+    store: Store,
+    name: Annotated[
+        str | None,
+        Query(description="Case-insensitive substring; trim query; blank means all."),
+    ] = None,
+) -> list[Item]:
+    return store.list(name=name)
 
 
 @router.get("/{item_id}", response_model=Item)

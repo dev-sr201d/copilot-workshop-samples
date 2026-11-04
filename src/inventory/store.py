@@ -12,8 +12,13 @@ class ItemStore:
         self._next_id += 1
         return item
 
-    def list(self) -> list[Item]:
-        return list(self._items.values())
+    def list(self, name: str | None = None) -> list[Item]:
+        normalized_name = name.strip().casefold() if name else ""
+        return [
+            item
+            for item in self._items.values()
+            if not normalized_name or normalized_name in item.name.casefold()
+        ]
 
     def get(self, item_id: int) -> Item | None:
         return self._items.get(item_id)
