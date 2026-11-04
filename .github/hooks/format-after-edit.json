@@ -1,0 +1,13 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "uv run python .github/hooks/format_after_edit.py",
+        "windows": "uv run python .github\\hooks\\format_after_edit.py",
+        "cwd": ".",
+        "timeout": 30
+      }
+    ]
+  }
+}

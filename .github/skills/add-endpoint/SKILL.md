@@ -18,9 +18,15 @@ argument-hint: "HTTP method, path, response shape and expected status."
    `uv run python .github/skills/add-endpoint/scripts/validate_endpoint.py /health`.
    Use `--method POST --status 201 --body '{"name":"Pen","quantity":2}'` for
    a POST example; shell quoting differs, so prefer a terminal with known quoting.
-6. Run the exact pytest and both ruff checks from AGENTS.md. Report results and
+6. Check the documented operation with [the OpenAPI checker](./scripts/check_openapi.py):
+   `uv run python .github/skills/add-endpoint/scripts/check_openapi.py /health`.
+   For POST /items, add `--method POST --status 201 --field id --field name`.
+   Use the declared path template for path parameters, such as `/items/{item_id}`.
+   The checker verifies operation, status and requested response properties.
+   It does not replace runtime tests or validate every OpenAPI schema construct.
+7. Run the exact pytest and both ruff checks from AGENTS.md. Report results and
    changed files; do not claim a failed script succeeded.
 
 The script imports the local application and uses an in-process TestClient:
 no server, external API, authentication or MCP is required. Each invocation
-starts with empty storage. For the OpenAPI contract extension, see Lab 3C.
+starts with empty storage. Neither script needs an MCP server.
